@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memecoin Confessions 🚀🌙</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', cursive;
+            height: 100%;
+            background-color: #4a90e2;
+            color: #ffffff;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffde59;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            max-width: min(75vw, 500px);
+            width: 100%;
+            border: 4px solid #000000;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #000000;
+            text-shadow: 2px 2px #ffde59;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .emoji {
+            font-size: 1.5em;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #000000;
+            font-size: 0.8em;
+        }
+        textarea, input {
+            margin-top: 5px;
+            padding: 10px;
+            border: 3px solid #000000;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-family: 'Press Start 2P', cursive;
+            background-color: #ffffff;
+            color: #000000;
+        }
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+        textarea {
+            min-height: 120px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #ff6b6b;
+            color: #ffffff;
+            border: 3px solid #000000;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-family: 'Press Start 2P', cursive;
+        }
+        button:hover {
+            background-color: #ff4757;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #000000;
+            font-size: 0.8em;
+        }
+        .pin-info {
+            font-size: 0.6em;
+            color: #000000;
+            margin-top: 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.6em;
+            color: #000000;
+        }
+        .pixel-art {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- <span class="emoji pixel-art">🚀</span> -->
+            <h1>Memecoin Confessions</h1>
+            <!-- <span class="emoji pixel-art">🌙</span> -->
+        </div>
+        <p style="text-align: center; color: #000000; margin-bottom: 20px; font-size: 0.7em;">
+            Share your wildest memecoin stories anonymously!<br>
+            <span style="font-size: 0.8em;">WAGMI 🚀 HODL 💎 TO THE MOON 🌙</span>
+        </p>
+        <form id="confessionForm">
+            <label for="confession">Your Confession:</label>
+            <textarea id="confession" name="confession" required placeholder="I YOLO'd my life savings into..."></textarea>
+            
+            <label for="pin">Secret PIN (4 digits):</label>
+            <input type="text" id="pin" name="pin" pattern="[0-9]{4}" maxlength="4" placeholder="1234">
+            <p class="pin-info">Remember this PIN if you need to contact us about your confession</p>
+            
+            <button type="submit" id="submitButton">
+                SUBMIT 💎
+            </button>
+        </form>
+        <div id="message"></div>
+        <div class="footer">
+            Built with 💎🙌 by degens, for degens
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('confessionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = document.getElementById('submitButton');
+            const messageDiv = document.getElementById('message');
+            const confession = document.getElementById('confession').value;
+            const pin = document.getElementById('pin').value;
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'HODLING...';
+            messageDiv.textContent = '';
+
+            try {
+                const response = await fetch('YOUR_PIPEDREAM_WEBHOOK_URL', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ confession, pin }),
+                });
+
+                if (response.ok) {
+                    messageDiv.textContent = 'Confession to the moon! 🚀';
+                    document.getElementById('confessionForm').reset();
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Paper hands! Try again! 😢';
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'SUBMIT 💎';
+            }
+        });
+    </script>
+</body>
+</html>
