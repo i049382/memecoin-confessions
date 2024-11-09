@@ -107,6 +107,9 @@
             margin-top: 5px;
         }
         .footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
             margin-top: 20px;
             text-align: center;
             font-size: 0.6em;
@@ -116,6 +119,24 @@
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
+        }
+        /* Add focus styles for better accessibility */
+        *:focus {
+            outline: 3px solid #4a90e2;
+            outline-offset: 2px;
+        }
+        
+        /* Improve button states */
+        button:focus-visible {
+            outline: 3px solid #4a90e2;
+            outline-offset: 2px;
+        }
+        
+        /* Add loading state styles */
+        .loading {
+            position: relative;
+            opacity: 0.7;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -130,13 +151,30 @@
             Share your wildest memecoin stories anonymously!<br>
             <span style="font-size: 0.8em;">WAGMI 🚀 HODL 💎 TO THE MOON 🌙</span>
         </p>
-        <form id="confessionForm">
+        <form id="confessionForm" novalidate>
             <label for="confession">Your Confession:</label>
-            <textarea id="confession" name="confession" required placeholder="I YOLO'd my life savings into..."></textarea>
+            <textarea 
+                id="confession" 
+                name="confession" 
+                required 
+                minlength="10"
+                maxlength="1000"
+                aria-describedby="confession-error"
+                placeholder="I YOLO'd my life savings into..."></textarea>
+            <div id="confession-error" class="error-message" aria-live="polite"></div>
             
             <label for="pin">Secret PIN (4 digits):</label>
-            <input type="text" id="pin" name="pin" pattern="[0-9]{4}" maxlength="4" placeholder="1234">
-            <p class="pin-info">Remember this PIN if you need to contact us about your confession</p>
+            <input 
+                type="password" 
+                inputmode="numeric"
+                id="pin" 
+                name="pin" 
+                pattern="[0-9]{4}" 
+                maxlength="4"
+                aria-describedby="pin-error pin-info"
+                placeholder="1234">
+            <div id="pin-error" class="error-message" aria-live="polite"></div>
+            <p id="pin-info" class="pin-info">Remember this PIN if you need to contact us about your confession</p>
             
             <button type="submit" id="submitButton">
                 SUBMIT 💎
@@ -152,13 +190,46 @@
     </div>
 
     <script>
-        document.getElementById('confessionForm').addEventListener('submit', async (e) => {
+        const form = document.getElementById('confessionForm');
+        const submitButton = document.getElementById('submitButton');
+        const messageDiv = document.getElementById('message');
+        
+        function validateForm() {
+            const confession = document.getElementById('confession');
+            const pin = document.getElementById('pin');
+            let isValid = true;
+
+            // Validate confession
+            if (confession.value.length < 10) {
+                document.getElementById('confession-error').textContent = 'Confession must be at least 10 characters';
+                isValid = false;
+            } else {
+                document.getElementById('confession-error').textContent = '';
+            }
+
+            // Validate PIN
+            if (!/^\d{4}$/.test(pin.value)) {
+                document.getElementById('pin-error').textContent = 'PIN must be exactly 4 digits';
+                isValid = false;
+            } else if (pin.value === '0000') {
+                document.getElementById('pin-error').textContent = 'C\'mon anon, that\'s a lame PIN! 🙄';
+                isValid = false;
+            } else {
+                document.getElementById('pin-error').textContent = '';
+            }
+
+            return isValid;
+        }
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const submitButton = document.getElementById('submitButton');
-            const messageDiv = document.getElementById('message');
-            const confession = document.getElementById('confession').value;
+            
+            if (!validateForm()) return;
+
+            const confession = document.getElementById('confession').value.trim();
             const pin = document.getElementById('pin').value;
 
+            form.classList.add('loading');
             submitButton.disabled = true;
             submitButton.textContent = 'HODLING...';
             messageDiv.textContent = '';
@@ -169,18 +240,22 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ confession, pin }),
+                    body: JSON.stringify({ 
+                        confession, 
+                        pin  // Send PIN directly
+                    }),
                 });
 
-                if (response.ok) {
-                    messageDiv.textContent = 'Confession to the moon! 🚀';
-                    document.getElementById('confessionForm').reset();
-                } else {
-                    throw new Error('Submission failed');
-                }
+                if (!response.ok) throw new Error('Submission failed');
+                
+                messageDiv.textContent = 'Confession to the moon! 🚀';
+                form.reset();
+                
             } catch (error) {
                 messageDiv.textContent = 'Paper hands! Try again! 😢';
+                console.error('Submission error:', error);
             } finally {
+                form.classList.remove('loading');
                 submitButton.disabled = false;
                 submitButton.textContent = 'SUBMIT 💎';
             }
